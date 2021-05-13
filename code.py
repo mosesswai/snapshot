@@ -1,4 +1,5 @@
-# Goals dashboard and quotes displayer
+##### SNAPSHOT #####
+# A life snapshot of goals, quotes and countdown to bliss
 
 import ipaddress
 import ssl
@@ -20,6 +21,12 @@ from quotes.quotes import Quotes
 # Constants
 BUTTON_AWAKE_TIME = 15
 REFRESH_TIME_IN_MINS = 15
+
+AWAKE_TONE = 100
+BUTTON_TONE = 1568
+
+UPDATE_COLOR = (255, 0, 0)
+REFRESH_COLOR = (255, 255, 255)
 
 ####################
 ###### Modules #####
@@ -44,11 +51,16 @@ change_module = False
 ################
 
 magtag = MagTag()
+magtag_pixels = magtag.peripherals.neopixels
+magtag_pixels.brightness = 0.1
 
 ##### Functions #####
 
 # Refresh the display
 def refresh_display():
+    magtag.peripherals.neopixel_disable = False
+    magtag.peripherals.neopixels.fill(REFRESH_COLOR)
+
     if active_module == modules["countdown"]:
         print('refreshing count')
         countdown.refresh(magtag)
@@ -56,13 +68,20 @@ def refresh_display():
         print('refreshing quotes')
         quotes.refresh(magtag)
 
+    magtag.peripherals.neopixel_disable = True
+
 
 # Update modules data
 def update_modules():    
     try:
+        magtag.peripherals.neopixel_disable = False
+        magtag.peripherals.neopixels.fill(UPDATE_COLOR)
+
         magtag.network.connect()
         countdown.update(magtag)
         quotes.update(magtag)
+
+        magtag.peripherals.neopixel_disable = True
 
     except (ValueError, RuntimeError) as e:
         magtag.set_text(e)
@@ -86,6 +105,9 @@ elif isinstance(alarm.wake_alarm, alarm.time.TimeAlarm):
 
 # if waking up from a pin alarm
 elif isinstance(alarm.wake_alarm, alarm.pin.PinAlarm):
+    # audio and visual feedback
+    magtag.peripherals.play_tone(AWAKE_TONE, 0.1)
+    
     active_module = alarm.sleep_memory[0]
     update_modules()
     
@@ -100,9 +122,11 @@ elif isinstance(alarm.wake_alarm, alarm.pin.PinAlarm):
     while (time.monotonic() - wake_time) < BUTTON_AWAKE_TIME:
         # Cycle through the active module
         if magtag.peripherals.button_d_pressed:
+            magtag.peripherals.play_tone(BUTTON_TONE, 0.1)
             active_module = (active_module + 1) % len(modules)
             change_module = True
         if magtag.peripherals.button_a_pressed:
+            magtag.peripherals.play_tone(BUTTON_TONE, 0.1)
             active_module = (active_module - 1) % len(modules)
             change_module = True
         
