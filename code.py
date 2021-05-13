@@ -13,48 +13,53 @@ from digitalio import DigitalInOut, Direction, Pull
 
 # Modules
 from countdown.countdown import Countdown
+from quotes.quotes import Quotes
 
 # Constants
 TIME_BETWEEN_REFRESHES = 5
 
-magtag = MagTag()
+####################
+###### Modules #####
+####################
 
-# # Set up where we'll be fetching data from
-# DATA_SOURCE = "https://www.adafruit.com/api/quotes.php"
-# QUOTE_LOCATION = [0, "text"]
-# AUTHOR_LOCATION = [0, "author"]
-# # in seconds, we can refresh about 100 times on a battery
-# TIME_BETWEEN_REFRESHES = 1 * 60 * 60  # one hour delay
+# Names
+modules = {
+  "countdown": 0,
+  "quotes": 1,
+}
 
-# magtag = MagTag(
-#     url=DATA_SOURCE,
-#     json_path=(QUOTE_LOCATION, AUTHOR_LOCATION),
-# )
+# Initializers
+countdown = Countdown()
+quotes = Quotes()
 
 # Number of active modules
-modules = [
-    "goals",
-    "quotes",
-    "bunny"
-]
+active_module = 0
+change_module = False
 
-module_id = 0
-module_change = False
+################
+##### Main #####
+################
 
+magtag = MagTag()
 
-# Modules
-countdown = Countdown()
+##### Functions #####
 
-
+# Refresh the display
 def refresh_display():
-    countdown.refresh(magtag)
+    if active_module == modules["countdown"]:
+        print('refreshing count')
+        countdown.refresh(magtag)
+    if active_module == modules["quotes"]:
+        print('refreshing quotes')
+        quotes.refresh(magtag)
 
 
+# Update modules data
 def update_modules():    
-    # refresh 'bunny'
     try:
         magtag.network.connect()
         countdown.update(magtag)
+        quotes.update(magtag)
 
     except (ValueError, RuntimeError) as e:
         magtag.set_text(e)
@@ -64,20 +69,19 @@ def update_modules():
 
 
 #####################
-##### MAIN LOOP #####
+##### LOOP #####
 #####################
 
 while True:
     # Cycle through the active module
     if magtag.peripherals.button_d_pressed:
-        module_id = (module_id + 1) % len(modules)
-        module_change = True
+        active_module = (active_module + 1) % len(modules)
+        change_module = True
     if magtag.peripherals.button_a_pressed:
-        module_id = (module_id - 1) % len(modules)
-        module_change = True
+        active_module = (active_module - 1) % len(modules)
+        change_module = True
     
-    if module_change:
-        module_change = False
+    if change_module:
+        change_module = False
         update_modules()
         refresh_display()
-

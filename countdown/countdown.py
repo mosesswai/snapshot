@@ -1,4 +1,6 @@
-# Countdown Module
+#############################
+###### Countdown Module #####
+#############################
 
 # Imports
 import time
@@ -15,7 +17,7 @@ class Countdown:
     # Variables
     time_target = time.struct_time((2021, 5, 25, 7, 0, 0, 1, 145, -1))
     time_diff = 0
-
+    
 
     ##### Initializer #####
     def __init__(self):
@@ -24,8 +26,24 @@ class Countdown:
 
     ##### Refresher #####
     def refresh(self, magtag):
+        # Bad practice, clears the splash text and empties the text cache in PortalBase
+        if len(magtag.splash) > 1:
+            for i in range(len(magtag.splash)-1):
+                magtag.splash.pop(-1)
+        magtag._text = []
+
         magtag.graphics.set_background(self.BACKGROUND)
 
+        # Calculate the text values
+        diff = self.time_diff
+        if diff > self.HOURS_TO_DAYS_THRESHOLD:
+            text_number = math.ceil(diff/self.HOURS_IN_A_DAY)
+            text_unit = "days"
+        else:
+            text_number = math.ceil(diff)
+            text_unit = "hours"
+
+        # Add the text objects
         magtag.add_text(
             text_font=terminalio.FONT,
             text_position=((magtag.graphics.display.width * 0.75), 35),
@@ -42,17 +60,14 @@ class Countdown:
             is_data=False,
         )
 
-        diff = self.time_diff
-        if diff > self.HOURS_TO_DAYS_THRESHOLD:
-            magtag.set_text(math.ceil(diff/self.HOURS_IN_A_DAY), 0, auto_refresh=False)
-            magtag.set_text("days", 1, auto_refresh=False)
-        else:
-            magtag.set_text(math.ceil(diff), 0, auto_refresh=False)
-            magtag.set_text("hours", 1, auto_refresh=False)
-        
-        # wait 2 seconds for display to complete
-        time.sleep(2)
+        # Set the text objects
+        magtag.set_text(text_number, 0, auto_refresh=False)
+        magtag.set_text(text_unit, 1, auto_refresh=False)
 
+        # wait 2 seconds for display to complete
+        magtag.refresh()
+        time.sleep(2)
+    
 
     ##### Updater #####
     def update(self, magtag):
