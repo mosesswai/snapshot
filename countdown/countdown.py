@@ -37,10 +37,10 @@ class Countdown:
         # Calculate the text values
         diff = self.time_diff
         if diff > self.HOURS_TO_DAYS_THRESHOLD:
-            text_number = math.ceil(diff/self.HOURS_IN_A_DAY)
+            text_number = math.floor(diff/self.HOURS_IN_A_DAY)
             text_unit = "days"
         else:
-            text_number = math.ceil(diff)
+            text_number = math.floor(diff)
             text_unit = "hours"
 
         # Add the text objects
