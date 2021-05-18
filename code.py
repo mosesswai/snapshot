@@ -1,21 +1,18 @@
 ##### SNAPSHOT #####
 # A life snapshot of goals, quotes and countdown to bliss
 
-import ipaddress
-import ssl
-import wifi
-import socketpool
-import adafruit_requests
-
+# Imports
 import board
 import time
 import math
+import json
 import alarm
 from adafruit_magtag.magtag import MagTag
 from digitalio import DigitalInOut, Direction, Pull
 
 # Modules
 from countdown.countdown import Countdown
+# from goals.goals import Goals
 from quotes.quotes import Quotes
 
 # Constants
@@ -40,6 +37,7 @@ modules = {
 
 # Initializers
 countdown = Countdown()
+# goals = Goals()
 quotes = Quotes()
 
 # Number of active modules
@@ -88,6 +86,41 @@ def update_modules():
         print("Some error occured, retrying later -", e)
 
 
+# Store module data on the RAM
+def store_data():
+    data = {
+        "module": active_module,
+    }
+    countdown.save_data(data)
+    quotes.save_data(data)
+
+    dump = json.dumps(data).encode('utf-8')
+    
+    mem_size = len(dump)
+    n = math.floor(mem_size/256) + 1
+    alarm.sleep_memory[0] = n
+    for i in range(1, n+1):
+        if i == n:
+            alarm.sleep_memory[i] = mem_size % 255
+        else:
+            alarm.sleep_memory[i] = 255
+    alarm.sleep_memory[n+1:mem_size+n+1] = dump
+
+
+# Load data stored on the RAM
+def load_data():
+    # print("sum is: ", sum(alarm.sleep_memory[0:n]))
+    n = alarm.sleep_memory[0]
+    mem_size = sum(alarm.sleep_memory[1:n+1])
+
+    data = json.loads(alarm.sleep_memory[n+1:mem_size+n+1].decode('utf-8'))
+    
+    global active_module
+    active_module = data["module"]
+    countdown.load_data(data)
+    quotes.load_data(data)
+
+
 #####################
 ##### OPERATION #####
 #####################
@@ -99,7 +132,7 @@ if not alarm.wake_alarm:
 
 # if waking up from a time alarm
 elif isinstance(alarm.wake_alarm, alarm.time.TimeAlarm):
-    active_module = alarm.sleep_memory[0]
+    load_data()
     update_modules()
     refresh_display()
 
@@ -108,9 +141,8 @@ elif isinstance(alarm.wake_alarm, alarm.pin.PinAlarm):
     # audio and visual feedback
     magtag.peripherals.play_tone(AWAKE_TONE, 0.1)
     
-    active_module = alarm.sleep_memory[0]
-    update_modules()
-    
+    load_data()
+
     if alarm.wake_alarm.pin is board.BUTTON_A:
         active_module = (active_module - 1) % len(modules)
         change_module = True
@@ -141,7 +173,7 @@ elif isinstance(alarm.wake_alarm, alarm.pin.PinAlarm):
 #################
 
 # Store module data
-alarm.sleep_memory[0] = active_module
+store_data()
 
 # Set the pin alarms
 magtag.peripherals.deinit()

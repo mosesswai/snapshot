@@ -75,3 +75,18 @@ class Countdown:
         magtag.get_local_time()
         now = time.localtime()
         self.time_diff = ( time.mktime(self.time_target) - time.mktime(now) ) / self.SECONDS_IN_HOUR
+
+    
+    ##### Saver #####
+    def save_data(self, data_dict):
+        data = {
+            "diff": self.time_diff
+        }
+        data_dict["countdown"] = data
+
+
+    ##### Loader #####
+    def load_data(self, data_dict):
+        data = data_dict["countdown"]
+        self.time_diff = data["diff"]
+        

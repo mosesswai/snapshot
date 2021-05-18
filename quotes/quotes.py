@@ -69,3 +69,19 @@ class Quotes:
 
         self.quote = value[0]
         self.author = value[1]
+
+
+    ##### Saver #####
+    def save_data(self, data_dict):
+        data = {
+            "quote": self.quote,
+            "author": self.author
+        }
+        data_dict["quotes"] = data
+
+
+    ##### Loader #####
+    def load_data(self, data_dict):
+        data = data_dict["quotes"]
+        self.quote = data["quote"]
+        self.author = data["author"]
