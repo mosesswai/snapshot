@@ -97,23 +97,17 @@ def store_data():
     dump = json.dumps(data).encode('utf-8')
     
     mem_size = len(dump)
-    n = math.floor(mem_size/256) + 1
+    n = math.floor(mem_size/255)
+    m = mem_size % 255
     alarm.sleep_memory[0] = n
-    for i in range(1, n+1):
-        if i == n:
-            alarm.sleep_memory[i] = mem_size % 255
-        else:
-            alarm.sleep_memory[i] = 255
-    alarm.sleep_memory[n+1:mem_size+n+1] = dump
+    alarm.sleep_memory[1] = m
+    alarm.sleep_memory[2:mem_size+2] = dump
 
 
 # Load data stored on the RAM
 def load_data():
-    # print("sum is: ", sum(alarm.sleep_memory[0:n]))
-    n = alarm.sleep_memory[0]
-    mem_size = sum(alarm.sleep_memory[1:n+1])
-
-    data = json.loads(alarm.sleep_memory[n+1:mem_size+n+1].decode('utf-8'))
+    mem_size = 255 * alarm.sleep_memory[0] + alarm.sleep_memory[1]
+    data = json.loads(alarm.sleep_memory[2:mem_size+2].decode('utf-8'))
     
     global active_module
     active_module = data["module"]
