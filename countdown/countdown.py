@@ -6,6 +6,7 @@
 import time
 import math
 import terminalio
+import secrets
 
 class Countdown:
     # Constants
@@ -15,7 +16,7 @@ class Countdown:
     BACKGROUND = "/countdown/countdown_bg.bmp"
 
     # Variables
-    time_target = time.struct_time((2021, 5, 25, 7, 0, 0, 1, 145, -1))
+    time_target = secrets.time_target
     time_diff = 0
     
 
@@ -41,6 +42,8 @@ class Countdown:
             text_unit = "days"
         else:
             text_number = math.floor(diff)
+            if text_number < 0:
+                text_number = 0
             text_unit = "hours"
 
         # Add the text objects
