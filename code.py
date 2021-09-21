@@ -12,7 +12,7 @@ from digitalio import DigitalInOut, Direction, Pull
 
 # Modules
 from countdown.countdown import Countdown
-# from goals.goals import Goals
+from goals.goals import Goals
 from quotes.quotes import Quotes
 
 # Constants
@@ -32,16 +32,17 @@ REFRESH_COLOR = (255, 255, 255)
 # Names
 modules = {
   "countdown": 0,
-  "quotes": 1,
+  "goals": 1,
+  "quotes": 2,
 }
 
 # Initializers
 countdown = Countdown()
-# goals = Goals()
+goals = Goals()
 quotes = Quotes()
 
 # Number of active modules
-active_module = 0
+active_module = 1
 change_module = False
 
 ################
@@ -62,6 +63,9 @@ def refresh_display():
     if active_module == modules["countdown"]:
         print('refreshing count')
         countdown.refresh(magtag)
+    if active_module == modules["goals"]:
+        print('refreshing goals')
+        goals.refresh(magtag)
     if active_module == modules["quotes"]:
         print('refreshing quotes')
         quotes.refresh(magtag)
@@ -77,6 +81,7 @@ def update_modules():
 
         magtag.network.connect()
         countdown.update(magtag)
+        goals.update(magtag)
         quotes.update(magtag)
 
         magtag.peripherals.neopixel_disable = True
