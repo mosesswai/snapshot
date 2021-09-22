@@ -16,7 +16,7 @@ class Countdown:
     BACKGROUND = "/countdown/countdown_bg.bmp"
 
     # Variables
-    time_target = secrets.time_target
+    SOURCE_URL = secrets.countdown_source_url
     time_diff = 0
     
 
@@ -74,10 +74,19 @@ class Countdown:
 
     ##### Updater #####
     def update(self, magtag):
-        # get time from the network
+        # get the time target
+        response = magtag.network.fetch(self.SOURCE_URL)
+        if response.status_code == 200:
+            entries = response.json()['values']
+            target = list(map(int, entries[1]))
+            time_target = time.struct_time((target[0], target[1], target[2], 
+                                            target[3], target[4], target[5], 
+                                            0, -1,-1))
+
+        # get current time from the network
         magtag.get_local_time()
         now = time.localtime()
-        self.time_diff = ( time.mktime(self.time_target) - time.mktime(now) ) / self.SECONDS_IN_HOUR
+        self.time_diff = ( time.mktime(time_target) - time.mktime(now) ) / self.SECONDS_IN_HOUR
 
     
     ##### Saver #####
