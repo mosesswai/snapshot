@@ -8,7 +8,6 @@ import math
 import json
 import alarm
 from adafruit_magtag.magtag import MagTag
-from digitalio import DigitalInOut, Direction, Pull
 
 # Modules
 from countdown.countdown import Countdown
@@ -97,6 +96,7 @@ def store_data():
         "module": active_module,
     }
     countdown.save_data(data)
+    goals.save_data(data)
     quotes.save_data(data)
 
     dump = json.dumps(data).encode('utf-8')
@@ -117,6 +117,7 @@ def load_data():
     global active_module
     active_module = data["module"]
     countdown.load_data(data)
+    goals.load_data(data)
     quotes.load_data(data)
 
 

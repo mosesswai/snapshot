@@ -98,6 +98,20 @@ class Goals:
             entries = response.json()['values']
             self.data = entries
 
+    
+    ##### Saver #####
+    def save_data(self, data_dict):
+        data = {
+            "array": self.data
+        }
+        data_dict["goals"] = data
+
+
+    ##### Loader #####
+    def load_data(self, data_dict):
+        data = data_dict["goals"]
+        self.data = data["array"]
+
 
     ##### OLD MICROSOFT GRAPH API CODE #####
     # def __init__(self):
