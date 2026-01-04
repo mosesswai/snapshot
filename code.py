@@ -13,6 +13,7 @@ from adafruit_magtag.magtag import MagTag
 from countdown.countdown import Countdown
 from goals.goals import Goals
 from quotes.quotes import Quotes
+from workout.workout import Workout
 
 # Constants
 BUTTON_AWAKE_TIME = 15
@@ -33,15 +34,17 @@ modules = {
   "countdown": 0,
   "goals": 1,
   "quotes": 2,
+  "workout": 3,
 }
 
 # Initializers
 countdown = Countdown()
 goals = Goals()
 quotes = Quotes()
+workout = Workout()
 
 # Number of active modules
-active_module = 1
+active_module = 3
 change_module = False
 
 ################
@@ -68,6 +71,9 @@ def refresh_display():
     if active_module == modules["quotes"]:
         print('refreshing quotes')
         quotes.refresh(magtag)
+    if active_module == modules["workout"]:
+        print('refreshing workout')
+        workout.refresh(magtag)
 
     magtag.peripherals.neopixel_disable = True
 
@@ -82,6 +88,7 @@ def update_modules():
         countdown.update(magtag)
         goals.update(magtag)
         quotes.update(magtag)
+        workout.update(magtag)
 
         magtag.peripherals.neopixel_disable = True
 
@@ -98,6 +105,7 @@ def store_data():
     countdown.save_data(data)
     goals.save_data(data)
     quotes.save_data(data)
+    workout.save_data(data)
 
     dump = json.dumps(data).encode('utf-8')
     
@@ -119,6 +127,7 @@ def load_data():
     countdown.load_data(data)
     goals.load_data(data)
     quotes.load_data(data)
+    workout.load_data(data)
 
 
 #####################
